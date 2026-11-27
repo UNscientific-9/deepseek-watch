@@ -1,0 +1,14 @@
+name = "deepseek-watch"
+compatibility_date = "2026-11-01"
+pages_build_output_dir = "public"
+
+# Pages 项目的 D1 绑定。首次部署前必须执行：
+#   npx wrangler d1 create deepseek-watch-db
+# 然后把输出的 database_id 填到下面，替换 REPLACE_WITH_D1_ID。
+# 本地 `npm run dev` 不需要真实 id，wrangler 会使用本地 D1 文件。
+[[d1_databases]]
+binding = "DB"
+database_name = "deepseek-watch-db"
+database_id = "REPLACE_WITH_YOUR_D1_ID"
+
+

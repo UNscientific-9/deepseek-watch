@@ -1,0 +1,26 @@
+{
+  "name": "deepseek-watch",
+  "version": "0.4.5",
+  "private": true,
+  "license": "MIT",
+  "description": "DeepSeek Watch：Cloudflare Pages + D1 的只读变化监控站（非官方）",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public --port 8788",
+    "dev:local": "wrangler pages dev public --port 8788 --d1 DB=deepseek-watch-db",
+    "version:sync": "node scripts/gen-version.mjs",
+    "predeploy": "node scripts/gen-version.mjs",
+    "deploy": "wrangler pages deploy public --project-name deepseek-watch --branch main",
+    "db:init": "wrangler d1 execute deepseek-watch-db --remote --file=./schema.sql",
+    "db:init:local": "wrangler d1 execute deepseek-watch-db --local --file=./schema.sql",
+    "seo:ping": "node scripts/ping-indexnow.mjs",
+    "test": "node --test tests/rss.test.js tests/validate.test.js tests/rate-limit.test.js tests/render.test.js tests/ingest.test.js tests/app.test.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "workerd": true
+  }
+}

@@ -1,0 +1,15 @@
+# 服务器同步脚本按工作树原始字节算哈希并打包；统一 LF，避免同一提交在不同
+# Windows 检出下哈希不同，或把 CRLF 的 shell/unit 文件发到 Linux 上。
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.zip binary
+*.gz binary

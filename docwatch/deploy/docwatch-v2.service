@@ -1,0 +1,41 @@
+[Unit]
+Description=docwatch v2 —— DeepSeek 前端资源监控 + agent 判读（单次巡检）
+Documentation=https://github.com/your-org/deepseek-watch
+After=network-online.target
+Wants=network-online.target
+# 巡检成功结束后立刻触发一次网站推送，让文档变化和网页事件同步上站。
+OnSuccess=deepseek-watch-push.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/docwatch-v2
+EnvironmentFile=/opt/docwatch-v2/env
+Environment=TZ=Asia/Shanghai
+ExecStart=/usr/bin/python3 -m docwatch.run --data-dir /opt/docwatch-v2/data
+# 采集 ~2 s + 唤醒 pi 一次 45~90 s（含复核），留足余量
+# 单轮唤醒最多 780s，启动时还可能补发多封邮件（每封 SMTP 最长 30s）。
+TimeoutStartSec=1800
+Nice=10
+IOSchedulingClass=idle
+
+# 主服务保持 root：wake.py 要用 systemd-run 给 pi 建沙箱；
+# 真正跑模型的 pi 由 wake.py 用 --uid=pi 降权，不再跟着主服务跑 root。
+# pi 的 agent 配置在 /home/user/.pi/agent，只读挂进来即可。
+ProtectHome=read-only
+ProtectSystem=strict
+ReadWritePaths=/opt/docwatch-v2/data
+# pi 的凭据副本放在这里：ProtectSystem=strict 下只有 RuntimeDirectory 可写，
+# 沙箱再把这一条路径单独 bind 成可写，供 pi 建 <auth>.lock。
+RuntimeDirectory=docwatch-pi-auth
+RuntimeDirectoryMode=0770
+PrivateTmp=true
+NoNewPrivileges=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+# 新生成的数据文件默认仅 root 可读；作业目录归 root，只把 jobs/<id>/out/ 交给 pi 用户
+UMask=0077

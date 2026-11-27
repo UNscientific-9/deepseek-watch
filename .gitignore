@@ -1,0 +1,56 @@
+# 本地临时文件
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.venv*/
+.tmp/
+.verify_tmp/
+*.log
+
+# 凭据与环境
+.env
+.env.*
+!.env.example
+apikey.env
+.secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# 运行状态与数据
+state/
+state-dryrun/
+*.corrupt-*
+docwatch/data/
+docwatch/env
+docwatch/render/out/
+
+# 浏览器工具与截图
+.playwright-mcp/
+screenshots/
+
+# 测试临时目录
+watchsite/tests/.tmp/
+
+# Cloudflare / wrangler
+watchcloud/node_modules/
+watchcloud/.wrangler/
+watchcloud/.dev.vars
+watchcloud/public/indexnow-key.txt
+watchcloud/*.sqlite
+watchcloud/*.sqlite3
+watchcloud/*.sqlite-shm
+watchcloud/*.sqlite-wal
+
+# 内部工作文档（不要随公开发布）
+AGENTS.md
+TASKS.md
+WORKSPACE.md
+RESULT.md
+docs/任务归档/
+docs/demo/
+
+# 其它
+.DS_Store

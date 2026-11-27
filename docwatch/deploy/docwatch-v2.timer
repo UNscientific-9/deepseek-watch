@@ -1,0 +1,11 @@
+[Unit]
+Description=docwatch v2 定时器 —— 每 15 分钟检查一次 DeepSeek 官方站点
+
+[Timer]
+OnCalendar=*-*-* *:00,15,30,45:00
+RandomizedDelaySec=120
+Persistent=true
+Unit=docwatch-v2.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=每 5 分钟调度 DeepSeek Web Watch（模型目录 5 分钟、网页 15 分钟、指纹 30 分钟）
+
+[Timer]
+OnCalendar=*:0/5
+RandomizedDelaySec=60
+Persistent=true
+Unit=deepseek-webwatch.service
+
+[Install]
+WantedBy=timers.target

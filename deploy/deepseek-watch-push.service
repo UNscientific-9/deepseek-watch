@@ -1,0 +1,48 @@
+[Unit]
+Description=DeepSeek Watch Station push (watchsite -> Cloudflare Pages / D1)
+Wants=network-online.target
+After=network-online.target
+# 推送成功后立即启动发布后复核；复核失败不影响网站，5 分钟 timer 兜底。
+OnSuccess=deepseek-recheck.service
+
+[Service]
+Type=oneshot
+# 专用非特权用户；由 deploy/sync-server-apply.sh 创建，不要改回 root。
+User=deepseek-watch
+Group=deepseek-watch
+WorkingDirectory=/opt/deepseek-watch
+# systemd 以 root 读取 EnvironmentFile 后再降权；该文件 600 root，服务用户本身无权读取。
+EnvironmentFile=/opt/deepseek-watch/env
+# webwatch 的 DynamicUser 数据在 /var/lib/private 下，推送用户不能直接穿过该目录；
+# 用只读 bind 挂载提供一份固定路径给 watchsite 读取。
+Environment=WEBWATCH_STATE=/var/lib/deepseek-webwatch-ro/state.json
+Environment=WEBWATCH_EVENTS_DIR=/var/lib/deepseek-webwatch-ro/events
+BindReadOnlyPaths=/var/lib/private/deepseek-webwatch:/var/lib/deepseek-webwatch-ro
+Environment=PYTHONDONTWRITEBYTECODE=1
+# watchsite 复用 docwatch 的分组 / 定级 / 行级差异提取逻辑（import docwatch）。
+# 少了这行，collect.py 的 import 会静默失败并退化到简版卡片，diff 与规则定级全部丢失。
+Environment=PYTHONPATH=/opt/docwatch-v2
+# 增量游标与告警冷却需要可写目录；docwatch 数据通过只读 ACL，webwatch 数据通过只读 bind。
+StateDirectory=deepseek-watch-push
+StateDirectoryMode=0750
+ExecStart=/usr/bin/python3 -m watchsite.push --once
+TimeoutStartSec=180
+Nice=10
+IOSchedulingClass=idle
+UMask=0077
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+NoNewPrivileges=yes
+# 非特权用户不需要任何 capability；读取其它服务数据由部署脚本授予只读 ACL。
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=256M
+TasksMax=32

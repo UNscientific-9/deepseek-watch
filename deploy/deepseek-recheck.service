@@ -1,0 +1,65 @@
+[Unit]
+Description=DeepSeek frontend event recheck (post-publication review)
+Documentation=file:/opt/deepseek-watch/watchsite/recheck_context.md
+Wants=network-online.target
+After=network-online.target deepseek-watch-push.service
+# 由 deepseek-watch-push.service 的 OnSuccess 触发；5 分钟 timer 兜底。
+# worker 以 root 运行，只做队列/校验/写事件/通知门控；模型进程由 systemd-run
+# 降权到 pi，并关进 ProtectHome=yes 的临时沙箱。
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/opt/deepseek-watch
+# 复用推送侧 env：QQ_NOTIFY_*、SMTP_* 都在这里；worker 不读取 DEEPSEEK_API_KEY。
+EnvironmentFile=/opt/deepseek-watch/env
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONPATH=/opt/deepseek-webwatch
+Environment=RECHECK_STATE_DIR=/var/lib/deepseek-recheck
+Environment=RECHECK_EVENTS_DIR=/var/lib/private/deepseek-webwatch/events
+Environment=RECHECK_VAULT_DIR=/var/lib/private/deepseek-webwatch/bundle-vault
+Environment=RECHECK_PUSH_STATE_DIR=/var/lib/deepseek-watch-push
+Environment=RECHECK_AGENT=/opt/agent/bin/agent
+Environment=RECHECK_AGENT_SRC=/run/recheck-auth-src
+Environment=RECHECK_AGENT_USER=pi
+Environment=RECHECK_AGENT_GROUP=pi
+Environment=RECHECK_AGENT_HOME_CONFIG=/run/recheck-auth-home.json
+Environment=RECHECK_MODEL=your-model-id
+# 级别修正默认关闭；先观察复核结论，确认稳定后再改成 1。
+Environment=RECHECK_APPLY_LEVEL=0
+Environment=RECHECK_LEVEL_MIN_GAP=2
+StateDirectory=deepseek-recheck
+StateDirectoryMode=0700
+# worker 复制 agent 凭据到 /run/deepseek-recheck-auth；必须有可写的运行时目录。
+RuntimeDirectory=deepseek-recheck-auth
+RuntimeDirectoryMode=0750
+ExecStart=/usr/bin/python3 -m watchsite.recheck --once
+TimeoutStartSec=4200
+Nice=10
+IOSchedulingClass=idle
+UMask=0077
+ProtectSystem=strict
+# ProtectSystem=strict 下整个文件系统只读；事件目录必须显式放行，否则写回必失败。
+ReadWritePaths=/var/lib/private/deepseek-webwatch/events
+# agent 沙箱用 ProtectHome=yes；worker 自己需要读白名单凭据复制到 /run，
+# 因此把凭据源只读 bind 到 /run（不能直接 bind 回 /home 下，ProtectHome 会盖掉）。
+ProtectHome=yes
+BindReadOnlyPaths=-/home/user/.claude:/run/recheck-auth-src
+BindReadOnlyPaths=-/home/user/.claude.json:/run/recheck-auth-home.json
+PrivateTmp=yes
+PrivateDevices=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+SystemCallArchitectures=native
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=768M
+TasksMax=256

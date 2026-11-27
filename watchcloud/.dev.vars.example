@@ -1,0 +1,4 @@
+# 本地 wrangler pages dev 用。复制成 .dev.vars（已被 .gitignore 忽略）。
+# 生产环境不要用这个文件；生产 token 用 wrangler pages secret put 设置。
+INGEST_TOKEN=local-test-token
+SITE_URL=http://127.0.0.1:8788

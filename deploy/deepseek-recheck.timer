@@ -1,0 +1,12 @@
+[Unit]
+Description=Run DeepSeek frontend event recheck every 5 minutes (fallback)
+
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=5min
+AccuracySec=30s
+Persistent=true
+Unit=deepseek-recheck.service
+
+[Install]
+WantedBy=timers.target

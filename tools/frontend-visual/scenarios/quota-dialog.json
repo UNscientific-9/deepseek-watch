@@ -1,0 +1,113 @@
+{
+  "name": "quota-dialog",
+  "description": "额度耗尽弹窗（登录后状态，服务端下发弹窗内容）",
+  "waitForText": "Quota limit reached",
+  "fullPage": true,
+  "mocks": {
+    "/api/v0/users/current": {
+      "code": 0,
+      "msg": "",
+      "data": {
+        "biz_code": 0,
+        "biz_msg": "",
+        "biz_data": {
+          "token": "fake-token-demo",
+          "id": "demo-user-1",
+          "email": "demo@example.com",
+          "mobile": "",
+          "area_code": "",
+          "status": 0,
+          "id_profile": null,
+          "chat": null
+        }
+      }
+    },
+    "/api/v0/chat_session/create": {
+      "code": 0,
+      "msg": "",
+      "data": {
+        "biz_code": 0,
+        "biz_msg": "",
+        "biz_data": {
+          "chat_session": {
+            "id": "demo-session-1",
+            "title": "",
+            "updated_at": "{{now}}",
+            "title_type": "",
+            "pinned": false,
+            "version": 0,
+            "model_type": "default"
+          },
+          "ttl_seconds": 3600
+        }
+      }
+    },
+    "/api/v0/chat_session/fetch_page": {
+      "code": 0,
+      "msg": "",
+      "data": {
+        "biz_code": 0,
+        "biz_msg": "",
+        "biz_data": {
+          "has_more": false,
+          "chat_sessions": []
+        }
+      }
+    },
+    "/api/v0/chat/status": {
+      "code": 0,
+      "msg": "",
+      "data": {
+        "biz_code": 0,
+        "biz_msg": "",
+        "biz_data": {
+          "generated_at": "{{now}}",
+          "quotas": [
+            {
+              "model_type": null,
+              "is_exhausted": true,
+              "reset_at": "{{now+3600}}",
+              "msg": "You've reached today's usage limit. Your quota will reset at 10:23 PM.",
+              "alert": {
+                "show_key": "demo-quota-alert",
+                "content": {
+                  "title": "Quota limit reached",
+                  "description": "You've reached today's usage limit. Your quota will reset at 10:23 PM. Learn more",
+                  "image": null,
+                  "button_group": {
+                    "button_layout": "vertical",
+                    "buttons": [
+                      {
+                        "text": "Got it",
+                        "style": "primary",
+                        "action": null
+                      }
+                    ]
+                  },
+                  "dismiss_affordances": [
+                    "close_button",
+                    "scrim"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "/api/v0/client/settings": {
+      "code": 0,
+      "msg": "",
+      "data": {
+        "biz_code": 0,
+        "biz_msg": "",
+        "biz_data": {
+          "settings": {},
+          "version": 1
+        }
+      }
+    }
+  },
+  "clickText": "开启新对话",
+  "clickWaitMs": 2500
+}

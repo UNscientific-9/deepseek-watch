@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 语法检查
+        run: python -m compileall -q watchsite webwatch docwatch deploy
+      - name: watchsite 测试
+        run: python -m unittest discover -s watchsite/tests -v
+      - name: webwatch 测试
+        run: python -m unittest discover -s webwatch/tests -t . -v
+      - name: docwatch 测试
+        run: python -m unittest docwatch.tests.test_docwatch_fixes -v
+      - name: docwatch 规则与排版自检
+        run: |
+          python -m docwatch.rules
+          python -m docwatch.render.test_render
+
+  node:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: watchcloud
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: watchcloud 测试
+        run: npm test

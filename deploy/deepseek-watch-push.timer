@@ -1,0 +1,12 @@
+[Unit]
+Description=Run DeepSeek Watch Station push every 5 minutes
+
+[Timer]
+OnCalendar=*:2/5
+RandomizedDelaySec=30
+AccuracySec=1min
+Persistent=true
+Unit=deepseek-watch-push.service
+
+[Install]
+WantedBy=timers.target
